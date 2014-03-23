@@ -1,0 +1,17 @@
+<launch>
+	<param name="/usb_cam/pixel_format" value="yuyv"/>
+
+	<node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
+
+	<node pkg="april_tag" name="april_tag_node" type="april_tag_node">
+		<remap from="/camera/image_raw" to="/usb_cam/image_raw"/>
+
+		<!-- focal_length_px: camera focal length in pixels. 
+		700 works well forlate 2013 macbook pro retina 13in -->
+		<param name="focal_length_px" value="700"/>
+		
+		<!-- tag_size_cm: size of edge of the black frame in cms -->
+		<param name="tag_size_cm" value="2.9"/> 
+	</node>
+
+</launch>
