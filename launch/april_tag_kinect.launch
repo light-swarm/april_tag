@@ -1,0 +1,15 @@
+<launch>
+	<include file="$(find openni_launch)/launch/openni.launch" />
+	
+	<node pkg="april_tag" name="april_tag_node" type="april_tag_node">
+		<remap from="/camera/image_raw" to="/camera/rgb/image_raw"/>
+
+		<!-- focal_length_px: camera focal length in pixels.  -->
+		<param name="focal_length_px" value="525"/>
+		
+		<!-- tag_size_cm: size of edge of the black frame in cms -->
+		<!-- printing from tag36h11_other.pdf produces 14.2cm tag -->
+		<param name="tag_size_cm" value="14.2"/> 
+	</node>
+
+</launch>
