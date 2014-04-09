@@ -57,6 +57,7 @@ class AprilTagNode
   double camera_focal_length_x; // in pixels. late 2013 macbookpro retina = 700
   double camera_focal_length_y; // in pixels
   double tag_size; // tag side length of frame in meters 
+  bool  show_debug_image;
 
 public:
   AprilTagNode() : 
@@ -65,7 +66,8 @@ public:
     tag_detector(NULL),
     camera_focal_length_y(700),
     camera_focal_length_x(700),
-    tag_size(0.029) // 1 1/8in marker = 0.029m
+    tag_size(0.029), // 1 1/8in marker = 0.029m
+    show_debug_image(false)
   {
     // Subscrive to input video feed and publish output video feed
     image_sub_ = it_.subscribe("/camera/image_raw", 1, &AprilTagNode::imageCb, this);
@@ -77,6 +79,7 @@ public:
     ros::NodeHandle private_node_handle("~"); 
     private_node_handle.param<double>("focal_length_px", camera_focal_length_x, 700.0);
     private_node_handle.param<double>("tag_size_cm", tag_size, 2.9);
+    private_node_handle.param<bool>("show_debug_image", show_debug_image, false);
 
     camera_focal_length_y = camera_focal_length_x; // meh
     tag_size = tag_size / 100.0; // library takes input in meters
@@ -85,12 +88,17 @@ public:
     cout << "got focal length " << camera_focal_length_x << endl;
     cout << "got tag size " << tag_size << endl;
     tag_detector = new AprilTags::TagDetector(tag_codes);
-    cv::namedWindow(OPENCV_WINDOW);
+    if (show_debug_image) {
+      cv::namedWindow(OPENCV_WINDOW);
+    }
+
   }
 
   ~AprilTagNode()
   {
-    cv::destroyWindow(OPENCV_WINDOW);
+    if (show_debug_image) {
+     cv::destroyWindow(OPENCV_WINDOW);
+    }
   }
 
   april_tag::AprilTag convert_to_msg(AprilTags::TagDetection& detection, int width, int height) {
@@ -170,12 +178,14 @@ public:
 
     processCvImage(cv_ptr);
 
-    // Update GUI Window
-    cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-    cv::waitKey(3);
-    
+    if (show_debug_image) {
+      // Update GUI Window
+      cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+      cv::waitKey(3);
+    }
+
     // Output modified video stream
-    image_pub_.publish(cv_ptr->toImageMsg());
+    //image_pub_.publish(cv_ptr->toImageMsg());
   }
 };
 
